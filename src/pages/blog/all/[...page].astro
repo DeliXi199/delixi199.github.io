@@ -1,0 +1,91 @@
+---
+import type { Post, Page } from "../../../types";
+import EnvelopeCard from "../../../components/EnvelopeCard.astro";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import Pagination from "../../../widget/Pagination.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths({ paginate }: { paginate: any }) {
+  const all_posts = await getCollection("blog");
+
+  // 按发布时间降序排序
+  const sortedPosts = all_posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+  // 获取带统计信息的博客数据
+  const postsWithStats = await Promise.all(
+    sortedPosts.map(async (post) => {
+      const { remarkPluginFrontmatter } = await post.render();
+      return {
+        ...post,
+        remarkPluginFrontmatter: {
+          readingTime: remarkPluginFrontmatter.readingTime,
+          totalCharCount: remarkPluginFrontmatter.totalCharCount,
+        },
+      };
+    }),
+  );
+
+  // 分页处理
+  return paginate(postsWithStats, {
+    pageSize: 10, // 每页显示 10 篇博客
+  });
+}
+
+const { page } = Astro.props as { page: Page };
+
+function generatePageLinks(totalPages: number): {
+  active: string[];
+  hidden: string[];
+} {
+  const pages = {
+    active: [] as string[],
+    hidden: [] as string[],
+  };
+
+  if (totalPages > 3) {
+    pages.active.push("1");
+    pages.active.push("...");
+    pages.active.push(totalPages.toString());
+    for (let i = 2; i <= totalPages - 1; i++) {
+      pages.hidden.push(i.toString());
+    }
+  } else {
+    for (let i = 1; i <= totalPages; i++) {
+      pages.active.push(i.toString());
+    }
+  }
+  return pages;
+}
+
+const totalPages = Math.ceil(page.total / page.size);
+const pageLinks = generatePageLinks(totalPages);
+---
+
+<BaseLayout title="All Blogs">
+  <h1>All Blogs</h1>
+  <hr />
+  {
+    page.data.map((post: Post) => (
+      <EnvelopeCard
+        title={post.data.title}
+        image={post.data.image}
+        desc={post.data.description}
+        url={"/blog/" + post.slug}
+        pubDate={post.data.pubDate}
+        badge={post.data.badge}
+        categories={post.data.categories}
+        tags={post.data.tags}
+        word={post.remarkPluginFrontmatter.totalCharCount}
+        time={post.remarkPluginFrontmatter.readingTime}
+        target="_self"
+      />
+    ))
+  }
+
+  <Pagination
+    page={page}
+    totalPages={totalPages}
+    pageLinks={pageLinks}
+    baseUrl={`/blog/all`}
+  />
+</BaseLayout>
