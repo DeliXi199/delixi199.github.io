@@ -20,25 +20,22 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'pnpm'
+          node-version: 22  # 与本地 Node.js 版本匹配
+          cache: 'npm'
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8.0.0
-          run_install: false
+      - name: Configure npm registry (optional for China users)
+        run: npm config set registry https://registry.npmmirror.com
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install
 
       - name: Build the project
-        run: pnpm run build
+        run: npm run build
 
       - name: Upload build artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist  # 你的 Astro 输出目录
+          path: dist  # 你的构建目录，确保与项目一致
 
   deploy:
     needs: build
