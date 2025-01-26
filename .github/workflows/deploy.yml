@@ -17,17 +17,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js and pnpm
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
 
-      - name: Install pnpm
-        run: npm install -g pnpm@8.0.0
-
-      - name: Install dependencies
-        run: pnpm install
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8.0.0
+          run_install: true  # 自动运行 `pnpm install`
 
       - name: Build the project
         run: pnpm run build
@@ -35,7 +35,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist  # 确保该路径与你的 Astro 项目输出一致
+          path: dist  # 确保与 Astro 项目输出一致
 
   deploy:
     needs: build
