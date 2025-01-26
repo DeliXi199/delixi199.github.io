@@ -1,13 +1,10 @@
 name: Deploy to GitHub Pages
 
 on:
-  # 每次推送到 `main` 分支时触发
   push:
     branches: [ main ]
-  # 允许手动触发
   workflow_dispatch:
 
-# 允许 job 克隆 repo 并创建 GitHub Pages 部署权限
 permissions:
   contents: read
   pages: write
@@ -20,32 +17,31 @@ jobs:
       - name: Checkout your repository using git
         uses: actions/checkout@v4
 
-      # 设置 Node.js 环境并指定版本
+      # 安装 Node.js 并设置 pnpm
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'  # 缓存 pnpm 依赖以加速构建
+          cache: 'pnpm'
 
-      # 设置 pnpm 包管理器，指定版本
-      - name: Install pnpm
+      - name: Setup PNPM
         uses: pnpm/action-setup@v4
         with:
-          version: 8.5.1  # 指定 pnpm 版本，可替换为最新版本
+          version: 8.5.1  # 确保这里指定正确版本
 
       # 安装依赖
       - name: Install dependencies
         run: pnpm install
 
-      # 构建 Astro 站点
+      # Astro 站点构建
       - name: Build the Astro site
         run: pnpm run build
 
-      # 上传构建产物到 GitHub Pages
+      # 上传构建产物
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
-          path: ./dist  # Astro 站点的构建输出目录
+          path: ./dist
 
   deploy:
     needs: build
