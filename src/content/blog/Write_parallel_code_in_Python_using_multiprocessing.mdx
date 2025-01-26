@@ -1,0 +1,111 @@
+---
+title: Write parallel code in Python using multiprocessing
+description: There are many ways to write parallel programs in Python, and using the `multiprocessing` library is one of the most intuitive and easy-to-write methods.
+pubDate: 01 21 2025
+image: /image/W.png
+categories:
+  - programming
+tags:
+  - Python
+  - multiprocessing
+---
+
+import Collapse from "../../components/mdx/Collapse.astro";
+import Diff from "../../components/mdx/Diff.astro";
+import Error from "../../components/mdx/Error.astro";
+import Info from "../../components/mdx/Info.astro";
+import Kbd from "../../components/mdx/Kbd.astro";
+import Success from "../../components/mdx/Success.astro";
+import Warning from "../../components/mdx/Warning.astro";
+import TimeLine from "../../components/mdx/TimeLine.astro";
+import LinkCard from "../../components/mdx/LinkCard.astro";
+
+
+## Preface
+
+During computation, we often need to use the `for` statement to repeatedly execute certain operations. 
+However, when dealing with a large amount of calculations, this can take a significant amount of time. 
+In most cases, the full potential of the computer's performance is not utilized—typically, 
+one core is overloaded while the others remain idle.
+
+If your computer has **8 cores**, you can use Python's `multiprocessing` library to leverage all **8 cores**. 
+By doing so, a task that would normally take **1 hour** can be completed in just **8 minutes**.
+
+
+## Main text
+
+### How to write parallel code
+
+#### Import libraries
+
+First, you need to import the `multiprocessing` library at the beginning. 
+This library enables parallel computing.
+
+``` python
+import multiprocessing
+```
+
+#### Write the Task Function
+
+Before executing parallel tasks, you need to define a task function that implements the parallel computation. 
+The task function allows the parallel processing of specific operations.
+
+Below is an example of a task function used to compute the matrix `H`. 
+The function `get_H` is used to calculate the element at the `i`-th row and `j`-th column of the matrix `H`.
+
+``` python
+def get_H(i, j, M, expp, distance):
+    Hijm = 0.0
+    for m in range(1, M):
+        eppi = expp[i, m] - expp[-1, m]
+        eppj = np.conj(expp[j, m]) - np.conj(expp[-1, m])
+        Hijm += eppi * eppj / distance[m]
+    return i, j, Hijm
+```
+
+#### Parallel Computing
+
+On the Windows platform, all multiprocessing-related code must be placed under the `if __name__ == '__main__':` block. 
+Otherwise, it may lead to infinite recursion or raise a `RuntimeError: freeze_support()` error.
+
+··· python
+if __name__ == '__main__':
+···
+
+The code for the parallel program is as follows:
+
+``` python
+with multiprocessing.Pool(processes=cores) as pool:
+  results = pool.starmap(
+      get_H,
+      [
+          (
+              i,
+              j,
+              M,
+              expp,
+              distance,
+          )
+          for i in range(N - 1)
+          for j in range(i + 1)
+      ],
+  )
+  for i, j, Hijm in results:
+      H[i, j] = Hijm
+      H[j, i] = np.conj(H[i, j])
+```
+
+The variable `cores` specifies the number of CPU cores to be used, while `get_H` refers to the task function. 
+The parameters from `i` to `distance` are the arguments for the task function. 
+The subsequent part defines the `for` loop variables, and finally, 
+the function's return values are retrieved from `results` to perform matrix assignment operations.
+
+### Key Points to Note
+
+- The code for the task function `get_H` must be written before the `if __name__ == '__main__':` block and not inside it.
+- During parallel execution, multiple processes will be created. The variables of the main process cannot be accessed by other processes, so it is necessary to pass the required variables as arguments to the task function `get_H`.
+- Loop variables such as `i, j` in the `for` loop are usually included as input and output parameters of the task function `get_H`.
+
+
+
+

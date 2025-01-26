@@ -1,0 +1,86 @@
+---
+title: How to use fermisurfer.exe
+description: fermisurfer.exe 这个软件大小非常小，用它可以非常方便第画出三维的Fermi surface图像，画的图也挺美观。
+pubDate: 01 17 2025
+image: /image/H.png
+categories:
+  - tool
+tags:
+  - Fermi_surface
+  - .frmsf
+---
+
+import Collapse from "../../components/mdx/Collapse.astro";
+import Diff from "../../components/mdx/Diff.astro";
+import Error from "../../components/mdx/Error.astro";
+import Info from "../../components/mdx/Info.astro";
+import Kbd from "../../components/mdx/Kbd.astro";
+import Success from "../../components/mdx/Success.astro";
+import Warning from "../../components/mdx/Warning.astro";
+import TimeLine from "../../components/mdx/TimeLine.astro";
+import LinkCard from "../../components/mdx/LinkCard.astro";
+
+
+## Preface
+
+费米面无疑是凝聚态物理一个非常主要的物理概念，有非常多的物理量都与费米面直接相关。在适用VASP这类工具对电子结构进行计算后，我们不仅需要看它的能带结构，
+计算出Fermi level后画费米面也经常是必不可少的。
+## Main text
+
+### 如何下载并安装fermisurfer.exe
+
+可以直接去[FermiSurfer官网](https://mitsuaki1987.github.io/fermisurfer/)下载到这个软件的最新exe文件，然后不需要安装即可直接使用。虽然它还有
+网页版的，感觉不太好用的样子，所以最好还是直接下软件来用吧。
+
+### 如何使用fermisurfer.exe
+
+这个软件不能直接双击打开，直接打开会弹出警告报错。正确的用法是把 `filename.frmsf` 文件拖到软件上，软件就会自动读取这个文件，并画出费米面的图像。
+这个软件对打开的文件类型也有要求，必须是 `filename.frmsf` 格式的文件才能被识别，可以通过修改 `filename.txt` 的扩展名为 `filename.frmsf` 来获得这个文件。
+当然还有其它的方法，比如可以直接通过VASPKIT软件包计算获得，这里就不过多介绍。
+
+### `.frmsf`文件内部数据的格式
+
+`.frmsf` 文件内部的数据格式非常简单，就是一个文本文件，我觉得可以简单的把它分为前面的坐标信息和后面的k点能量信息两个部分。
+按照确定的格式就可以非常轻松地完成文件的书写，下面介绍费米面仅通过一条能带的文件写法。
+
+#### 前面的坐标信息
+
+画 Cu 费米面的写法如下：
+
+``` frmsf
+    16    16    16
+ 1
+     1
+   -1.738087222    1.738087222    1.738087222
+    1.738087222   -1.738087222    1.738087222
+    1.738087222    1.738087222   -1.738087222
+```
+画费米面需要k空间的能量分布信息，这里要求k构建均匀分布的网格，所以这里```16 16 16```表示网格的密度，这里的网格大小可以根据需要进行调整，
+一般来说都是x、y、z三个方向都是均匀的。
+
+后面的两个 `1` 不要改，*后面我查查具体作用*
+后面的三行自然就是 Cu 的三个晶格矢量，需要正确填写，决定了第一布里渊区的形状。
+
+#### 后面的k点能量信息
+
+``` frmsf
+-2.331472000002563938e+00
+-2.356004282955814766e+00
+-2.378172417410610695e+00
+-2.336082051331553888e+00
+-2.237732381113723079e+00
+-2.084983949349215049e+00
+-1.923816662485264839e+00
+-1.610862514730351469e+00
+...
+```
+后面的就是一个个 k 空间网格的能量， k 空间三个分数坐标都是 $0\sim+1$ 范围，但是注意这里不能两边都取到，
+会有重叠导致费米面扭曲，所以选择左闭右开的取值方式。能量按照先遍历第三个分数坐标，再遍历第二个分数坐标，最后遍历第一个分数坐标的顺序排列。
+
+### 画出的图像的格式
+
+![费米面](/image/H.png)
+这里展示的就是 `fermisurfer.exe` 画出的 Cu 费米面的图像。
+
+
+
