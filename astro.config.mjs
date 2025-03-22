@@ -13,7 +13,7 @@ import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 import { transformers } from "./src/config/transformers.js";
 
-import { CODE_THEME, USER_SITE } from "./src/consts.ts";
+import { CODE_THEME } from "./src/consts.ts";
 
 import { initI18n } from "./src/locales";
 import { rehypeFadeInUp } from "./src/plugins/rehype-fade-in-up.mjs";
