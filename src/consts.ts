@@ -36,29 +36,6 @@ export const menuItems = [
     href: "/blog",
     svg: "material-symbols:book-2-outline-rounded",
     target: "_self",
-    subItems: [
-      {
-        id: "all",
-        text: "All blogs",
-        href: "/blog/all",
-        svg: "material-symbols:ink-pen-outline-rounded",
-        target: "_self",
-      }, // All blog
-      {
-        id: "tech",
-        text: "Tech blogs",
-        href: "/blog/categories/tech",
-        svg: "material-symbols:deployed-code-outline",
-        target: "_self",
-      }, // Technology category
-      {
-        id: "life",
-        text: "Life blogs",
-        href: "/blog/categories/life",
-        svg: "material-symbols:earthquake-rounded",
-        target: "_self",
-      }, // Life category
-    ],
   }, // Blog page with sub-items
   {
     id: "project",

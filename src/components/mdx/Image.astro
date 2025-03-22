@@ -1,7 +1,6 @@
 ---
 const { src, alt = '', width = '100%', height } = Astro.props;
 
-// 处理宽度为百分比（如 30%）、像素（如 400）、数值（如 200）
 let styleWidth = '';
 if (typeof width === 'string') {
   styleWidth = width;
@@ -13,8 +12,8 @@ if (typeof width === 'string') {
 <img
   src={src}
   alt={alt}
-  width={undefined}  <!-- 禁用原生 width 属性，否则可能破坏样式 -->
+  width={undefined}
   height={height}
   loading="lazy"
-  style={`display: block; margin: 1rem auto; max-width: 100%; width: ${styleWidth}; height: auto;`}
+  style={`display: block; margin: 1rem auto; width: ${styleWidth}; height: auto;`}
 />
