@@ -1,0 +1,73 @@
+---
+title: VSCode connects to a remote server via SSH
+description: Use VSCode to connect to a remote server and enable password-free login by setting up mutual trust between nodes.
+pubDate: 02 15 2025
+image: /image/VSCode_connects_to_a_remote_server_via_SSH/image.png
+categories:
+  - Tech
+tags:
+  - SSH
+---
+
+import Collapse from "../../components/mdx/Collapse.astro";
+import Diff from "../../components/mdx/Diff.astro";
+import Error from "../../components/mdx/Error.astro";
+import Info from "../../components/mdx/Info.astro";
+import Kbd from "../../components/mdx/Kbd.astro";
+import Success from "../../components/mdx/Success.astro";
+import Warning from "../../components/mdx/Warning.astro";
+import TimeLine from "../../components/mdx/TimeLine.astro";
+import LinkCard from "../../components/mdx/LinkCard.astro";
+import Image from "../../components/mdx/Image.astro";
+
+
+## Preface
+
+VSCode is an excellent code editor, and using it to connect to a server is also a great choice. This article will introduce how to connect to a remote server using VSCode and enable password-free login by setting up mutual trust between nodes.
+## Main text
+
+### Install VSCode Plugin
+
+First, you must have [VSCode](https://code.visualstudio.com/Download) installed on your computer.  
+Then, you can download the **Remote-SSH** plugin from the extensions panel.  
+
+<Image src="/image/VSCode_connects_to_a_remote_server_via_SSH/image1.png" alt="config.png" width="30%" />
+
+
+After installation, a remote connection icon will appear on the left sidebar.
+
+<Image src="/image/VSCode_connects_to_a_remote_server_via_SSH/image2.png" alt="remote.png" width="20%" />
+
+<Image src="/image/VSCode_connects_to_a_remote_server_via_SSH/image3.png" alt="remote.png" width="90%" />
+
+
+ Click on the SSH settings icon to open the `config` file and configure it as follows:
+
+
+```config
+Host Supercomputer_cluster
+    HostName 159.226.208.68
+    User yihaoxu
+    Port 61288
+```
+- The name after `Host` can be anything you choose.  
+- The value after `HostName` should be your server's IP address.  
+- The value after `User` should be your username.  
+- The value after `Port` should be your server's port number.  
+
+
+Click the connection arrow to start connecting, then enter your account password to log in to the server.
+
+<Image src="/image/VSCode_connects_to_a_remote_server_via_SSH/image4.png" alt="login.png" width="30%" />
+
+### Set up password-free login
+
+- Run the `ssh-keygen -t rsa` command on both your local computer and the server, pressing Enter to accept all defaults.
+
+In your local computer’s `C:\Users\YourUsername\.ssh` directory, two files will be generated: `id_rsa` (private key) and `id_rsa.pub` (public key).
+
+- Copy the contents of `id_rsa.pub` and paste them into the `~/.ssh/authorized_keys` file on the server.
+
+After this setup, you can access the server using VSCode without entering a password.
+
+
