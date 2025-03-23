@@ -1,0 +1,121 @@
+---
+title: Configuring a C++ environment on a server with conda  
+description: When working on a project, Conda can be a simple and effective way to set up a suitable virtual environment for C++ development.  
+pubDate: 03 22 2025  
+image: /image/Configuring_a_C++_environment_on_a_server_with_conda/image.png  
+categories:
+  - Tech  
+tags:
+  - C++  
+  - Conda  
+---
+
+import Collapse from "../../components/mdx/Collapse.astro";
+import Diff from "../../components/mdx/Diff.astro";
+import Error from "../../components/mdx/Error.astro";
+import Info from "../../components/mdx/Info.astro";
+import Kbd from "../../components/mdx/Kbd.astro";
+import Success from "../../components/mdx/Success.astro";
+import Warning from "../../components/mdx/Warning.astro";
+import TimeLine from "../../components/mdx/TimeLine.astro";
+import LinkCard from "../../components/mdx/LinkCard.astro";
+import Image from "../../components/mdx/Image.astro";
+
+## Preface
+
+On a research group's computing cluster, system-wide versions of C++ and MPI are often outdated for the sake of stability. 
+This can cause compatibility issues during development.
+
+While Conda is typically used for Python environments, it is also highly effective for configuring custom C++ environments, 
+including specific versions of MPI and OpenMP.
+
+## Main Content
+
+### Creating the Conda Environment
+
+Assuming Anaconda is already installed, run the following commands to create a new virtual environment with updated GCC and CMake:
+
+```bash
+conda create -n mpi_env gxx_linux-64=12.1.0 gcc_linux-64=12.1.0 cmake make -c conda-forge
+conda activate mpi_env
+```
+
+Check if the compilers are correctly configured:
+
+```bash
+which gcc
+which g++
+```
+
+Then, install MPI:
+
+```bash
+conda install mpich -c conda-forge
+```
+
+The `mpich` package includes the MPI libraries and essential tools like `mpicc`, `mpicxx`, and `mpirun` for compiling and running parallel programs.
+
+> ⚠️ However, the system's default `mpicxx` may still take precedence over the Conda-installed version. To ensure Conda's version is prioritized when the environment is activated, run:
+
+```bash
+echo 'export PATH="$CONDA_PREFIX/bin:$PATH"' >> $CONDA_PREFIX/etc/conda/activate.d/force_conda_path.sh
+```
+
+Then, reactivate the environment:
+
+```bash
+conda deactivate
+conda activate mpi_env
+```
+
+Verify the updated MPI toolchain:
+
+```bash
+which mpicxx
+mpicxx -show
+```
+
+Now, you can install any additional C++ packages you need, such as Google Test:
+
+```bash
+conda install gtest -c conda-forge
+```
+
+To compile your C++ program:
+
+```bash
+mpicxx -std=c++11 -O2 -o mpi_demo mpi_demo.cpp
+```
+
+> ⚠️ Important: Conda's version of `libstdc++.so.6` may conflict with the system MPI or UCX libraries. Therefore, it's recommended **not to use `srun` to submit jobs**, but instead use the `mpirun` provided by Conda’s `mpich` package. This ensures all processes use only the libraries inside the Conda environment.
+
+### Example SLURM Script
+
+```bash
+#!/bin/bash
+#SBATCH --account=hmt03
+#SBATCH --job-name=mpi_demo
+#SBATCH --partition=regular6430
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=1
+#SBATCH --output=slurm-%j.out
+#SBATCH --error=slurm-%j.err
+#SBATCH --time=01:00:00    # ✅ Optional: set a max run time
+
+# ✅ Initialize Conda for shell usage
+source ~/Python/anaconda3/etc/profile.d/conda.sh
+
+# ✅ Activate the desired environment
+conda activate ALB_basis
+
+# ✅ Force usage of libraries inside Conda
+export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+
+# ✅ Disable UCX and InfiniBand to avoid UCX-related errors
+export UCX_TLS=^all
+export OMPI_MCA_btl=^openib
+
+# ✅ Use Conda's version of mpirun
+$CONDA_PREFIX/bin/mpirun -n 2 ./mpi_demo
+```

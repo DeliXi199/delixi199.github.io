@@ -1,115 +1,15 @@
 ---
-title: Conda配置服务器C++环境
-description: 在做项目时，使用Conda可以非常简单地创建合适的C++虚拟环境
-pubDate: 03 22 2025
-image: /image/VSCode_connects_to_a_remote_server_via_SSH/image.png
+title: Windows 有用的命令
+description: "Lorem ipsum dolor sit amet"
+pubDate: 03 23 2025
+image: /image/using-mdx/image1.jpg
 categories:
   - Tech
 tags:
-  - C++
-  - Conda
+  - Windows
 ---
 
-import Collapse from "../../components/mdx/Collapse.astro";
-import Diff from "../../components/mdx/Diff.astro";
-import Error from "../../components/mdx/Error.astro";
-import Info from "../../components/mdx/Info.astro";
-import Kbd from "../../components/mdx/Kbd.astro";
-import Success from "../../components/mdx/Success.astro";
-import Warning from "../../components/mdx/Warning.astro";
-import TimeLine from "../../components/mdx/TimeLine.astro";
-import LinkCard from "../../components/mdx/LinkCard.astro";
-import Image from "../../components/mdx/Image.astro";
-
-
-## Preface
-
-在课题组的计算集群中，为了稳定性，它C++，MPI的版本可能会非常低，在使用时可能就会出现版本不兼容的问题。
-Conda不仅可以配置合适的Python虚拟环境，还可以配置C++虚拟环境，以及如何配置合适版本的MPI。
-
-## Main text
-
-### 创建虚拟环境
-
-默认已经安装好Anaconda，使用一下命令创建合适的C++虚拟环境：
-
-```bash
-conda create -n mpi_env gxx_linux-64=12.1.0 gcc_linux-64=12.1.0 cmake make -c conda-forge
-conda activate mpi_env
+1. 搜索当前路径下所有文件中特定字符串的位置
 ```
-
-验证是否正确配置：
-
-```bash
-which gcc
-which g++
+Get-ChildItem -Recurse -Include *.astro,*.mdx,*.ts,*.js -Path .\src\ | Select-String "your_string"  
 ```
-
-在进入自己创建的`mpi_env`环境后，运行下列代码：
-
-```bash
-conda install mpich -c conda-forge
-```
-
-`mpich`提供了 `MPI` 库和 `mpicc`, `mpicxx`, `mpirun` 等工具，用于编译和运行并行程序.
-
-`Conda` 安装了 `mpich`，但系统  `PATH`  中原先的 `mpicxx`路径仍然排在前面，需要自动添加`PATH`的优先级，需要执行下面代码，这样
-在环境启动时变可以自动调更改优先级
-```bash
-echo 'export PATH="$CONDA_PREFIX/bin:$PATH"' >> $CONDA_PREFIX/etc/conda/activate.d/force_conda_path.sh
-```
-然后重新激活环境：
-```bash
-conda deactivate
-conda activate mpi_env
-```
-验证是否正确修改：
-```bash
-which mpicxx
-mpicxx -show
-```
-
-在配置好上面的环境后，有任何需要的包（如 `gtest`）都可以安装：
-
-```bash
-conda install gtest -c conda-forge
-```
-
-然后使用下面的命令便可以编译C++程序：
-
-```bash
-mpicxx -std=c++11 -O2 -o mpi_demo mpi_demo.cpp
-```
-
-`Conda` 的 `libstdc++.so.6` 可能与系统 `MPI/UCX` 冲突，最好不要用 srun 提交的任务，
-应该改为用 `Conda` 安装的 `mpich` 自带的 `mpirun`，就能让所有进程 仅使用 `Conda` 环境里的库，避免混用。
-```slurm
-#!/bin/bash
-#SBATCH --account=hmt03
-#SBATCH --job-name=mpi_demo
-#SBATCH --partition=regular6430
-#SBATCH --nodes=2
-#SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=1
-#SBATCH --output=slurm-%j.out
-#SBATCH --error=slurm-%j.err
-#SBATCH --time=01:00:00    # ✅ 可选：加一个默认最长运行时间
-
-# ✅ 加载 Conda 初始化脚本（让 conda activate 生效）
-source ~/Python/anaconda3/etc/profile.d/conda.sh
-
-# ✅ 激活你想用的环境
-conda activate ALB_basis
-
-# ✅ 强制使用 Conda 环境中的库
-export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
-
-# ✅ 禁用 UCX 和 InfiniBand（避免 UCX 异常）
-export UCX_TLS=^all
-export OMPI_MCA_btl=^openib
-
-# ✅ 使用 Conda 自带的 mpirun
-$CONDA_PREFIX/bin/mpirun -n 2 ./mpi_demo
-```
-
-
