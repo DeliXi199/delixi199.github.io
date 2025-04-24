@@ -38,6 +38,13 @@ export const menuItems = [
     target: "_self",
   }, // Blog page with sub-items
   {
+    id: "todolists",
+    text: "TodoLists",
+    href: "/todolists",
+    svg: "material-symbols:checklist",
+    target: "_self",
+  }, // Projects page
+  {
     id: "project",
     text: "Project",
     href: "/project",

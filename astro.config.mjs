@@ -36,7 +36,6 @@ export default defineConfig({
   integrations: [
     react(),            // ← 加在这里
     mdx(),
-    tailwind(),
     icon({
       include: {
         mdi: ["*"],

@@ -1,0 +1,71 @@
+export const todos = [
+  {
+    category: '工作',
+    color: 'emerald',
+    sub: [
+      {
+        subCategory: '会议',
+        items: [
+          { text: '团队同步', done: false, time: '2025-04-25' },
+          { text: '评审文档', done: true,  time: '2025-04-24' },
+          { text: '团队同步', done: true,  time: '2025-04-25' },
+          { text: '评审文档', done: false, time: '2025-04-24' },
+        ],
+      },
+      {
+        subCategory: '开发',
+        items: [
+          { text: '写功能',   done: false, time: '2025-04-25' },
+        ],
+      },
+    ],
+  },
+  {
+    category: '生活',
+    color: 'sky',
+    sub: [
+      {
+        subCategory: '购物',
+        items: [
+          { text: '买菜 🥬', done: false, time: '2025-04-24' },
+        ],
+      },
+      {
+        subCategory: '运动',
+        items: [
+          { text: '健身房',   done: false, time: '2025-04-24' },
+        ],
+      },
+    ],
+  },
+  {
+    category: '学习',
+    color: 'indigo',
+    sub: [
+      {
+        subCategory: '考试',
+        items: [
+          { text: '刷题',     done: false, time: '2025-04-24' },
+          { text: '复习笔记', done: true,  time: '2025-04-23' },
+          // … 其它条目 …
+        ],
+      },
+      {
+        subCategory: '看书',
+        items: [
+          { text: '读论文',   done: false, time: '2025-04-24' },
+        ],
+      },
+    ],
+  },
+];
+
+import BaseLayout  from '../layouts/BaseLayout.astro';
+import BaseCard    from '../components/BaseCard.astro';
+import TodoList    from '../components/TodoList.tsx';
+
+<BaseLayout title="Project">
+  <BaseCard title="Project">
+    <TodoList client:load todos={todos} />
+  </BaseCard>
+</BaseLayout>
