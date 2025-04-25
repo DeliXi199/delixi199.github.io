@@ -1,64 +1,74 @@
 export const todos = [
   {
-    category: '工作',
+    id: 1,  // 为 category 添加 id
+    category: '旅行',
     color: 'emerald',
     sub: [
       {
-        subCategory: '会议',
+        id: 1,  // 为每个子分类添加 id
+        subCategory: '云南',
         items: [
-          { text: '团队同步', done: false, time: '2025-04-25' },
-          { text: '评审文档', done: true,  time: '2025-04-24' },
-          { text: '团队同步', done: true,  time: '2025-04-25' },
-          { text: '评审文档', done: false, time: '2025-04-24' },
+          { id: 1, text: '玉龙雪山', done: false, time: '' },
         ],
       },
       {
-        subCategory: '开发',
+        id: 2,
+        subCategory: '湖北',
         items: [
-          { text: '写功能',   done: false, time: '2025-04-25' },
+          { id: 2, text: '[武汉]空轨道列车、有轨电车', done: false, time: '' },
+          { id: 1, text: '[武汉]萝卜快跑', done: false, time: '' },
+          { id: 3, text: '[武汉]湖北美术馆、湖北博物馆', done: false, time: '' },
+        ],
+      },
+      {
+        id: 3,
+        subCategory: '其它',
+        items: [
+          { id: 1, text: '坐跨海轮渡', done: false, time: '' },
         ],
       },
     ],
   },
   {
+    id: 2,
     category: '生活',
     color: 'sky',
     sub: [
       {
+        id: 1,
         subCategory: '购物',
         items: [
-          { text: '买菜 🥬', done: false, time: '2025-04-24' },
         ],
       },
       {
+        id: 2,
         subCategory: '运动',
         items: [
-          { text: '健身房',   done: false, time: '2025-04-24' },
         ],
       },
     ],
   },
   {
+    id: 3,
     category: '学习',
     color: 'indigo',
     sub: [
       {
-        subCategory: '考试',
+        id: 1,
+        subCategory: '物理',
         items: [
-          { text: '刷题',     done: false, time: '2025-04-24' },
-          { text: '复习笔记', done: true,  time: '2025-04-23' },
-          // … 其它条目 …
         ],
       },
       {
-        subCategory: '看书',
+        id: 2,
+        subCategory: '计算机',
         items: [
-          { text: '读论文',   done: false, time: '2025-04-24' },
         ],
       },
     ],
   },
 ];
+
 
 import BaseLayout  from '../layouts/BaseLayout.astro';
 import BaseCard    from '../components/BaseCard.astro';

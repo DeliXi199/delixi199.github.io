@@ -1,22 +1,25 @@
-// src/components/TodoList.tsx
 import React, { useState, useEffect, useMemo } from 'react'
 
 export type Item = {
+  id: number  // 为每个 item 添加 id 字段
   text: string
   done: boolean
   time: string
 }
+
 export type SubCategory = {
+  id: number  // 为子分类添加 id 字段
   subCategory: string
   items: Item[]
 }
+
 export type Category = {
+  id: number  // 为 category 添加 id 字段
   category: string
   color: keyof typeof colorMap
   sub: SubCategory[]
 }
 
-// 仅用来控制按钮和复选框等高亮色，其它背景/文字都用 DaisyUI 变量
 const colorMap = {
   rose: {
     tabActiveBg: 'bg-rose-500',
@@ -85,29 +88,37 @@ interface TodoListProps {
 }
 
 const TodoList: React.FC<TodoListProps> = ({ todos }) => {
-  // 一级分类
-  const [activeCat, setActiveCat] = useState(todos[0]?.category ?? '')
-  const activeColor = todos.find(c => c.category === activeCat)?.color ?? 'rose'
+  // 一级分类排序
+  const sortedCategories = useMemo(() => {
+    return [...todos].sort((a, b) => a.id - b.id)
+  }, [todos])
 
-  // 二级分类
-  const subsForActive = todos.find(c => c.category === activeCat)?.sub ?? []
-  const [activeSub, setActiveSub] = useState(subsForActive[0]?.subCategory ?? '')
+  const [activeCat, setActiveCat] = useState(sortedCategories[0]?.category ?? '')
+  const activeColor = sortedCategories.find(c => c.category === activeCat)?.color ?? 'rose'
+
+  const subsForActive = sortedCategories.find(c => c.category === activeCat)?.sub ?? []
+  const sortedSubs = useMemo(() => {
+    return [...subsForActive].sort((a, b) => a.id - b.id)
+  }, [activeCat, sortedCategories])
+
+  const [activeSub, setActiveSub] = useState(sortedSubs[0]?.subCategory ?? '')
   useEffect(() => {
-    const subs = todos.find(c => c.category === activeCat)?.sub ?? []
+    const subs = sortedCategories.find(c => c.category === activeCat)?.sub ?? []
     setActiveSub(subs[0]?.subCategory ?? '')
-  }, [activeCat, todos])
+  }, [activeCat, sortedCategories])
 
-  // 排序：未完成→完成 + 时间降序
+  // 对 items 按照 "done" 状态排序，未完成的在前面，再按 id 排序
   const items = useMemo(() => {
-    const list = todos
+    const list = sortedCategories
       .find(c => c.category === activeCat)
       ?.sub.find(s => s.subCategory === activeSub)
       ?.items ?? []
     return [...list].sort((a, b) => {
+      // 未完成的排在前面，按 id 排序
       if (a.done !== b.done) return a.done ? 1 : -1
-      return new Date(b.time).getTime() - new Date(a.time).getTime()
+      return a.id - b.id
     })
-  }, [todos, activeCat, activeSub])
+  }, [sortedCategories, activeCat, activeSub])
 
   const m = colorMap[activeColor]
 
@@ -121,19 +132,17 @@ const TodoList: React.FC<TodoListProps> = ({ todos }) => {
 
       {/* 一级分类 Tabs */}
       <div className="flex flex-wrap gap-4 p-6 bg-base-200">
-        {todos.map(({ category, color }) => {
+        {sortedCategories.map(({ category, color, id }) => {
           const mp = colorMap[color]
           const isActive = category === activeCat
           return (
             <button
-              key={category}
+              key={id}
               onClick={() => setActiveCat(category)}
-              className={`
-                px-6 py-2 rounded-full text-lg font-medium transition
+              className={`px-6 py-2 rounded-full text-lg font-medium transition
                 ${isActive ? mp.tabActiveBg : mp.tabInactiveBg}
                 ${isActive ? mp.tabActiveText : mp.tabInactiveText}
-                ${isActive ? 'shadow-lg' : mp.tabHoverBg}
-              `}
+                ${isActive ? 'shadow-lg' : mp.tabHoverBg}`}
             >
               {category}
             </button>
@@ -142,19 +151,17 @@ const TodoList: React.FC<TodoListProps> = ({ todos }) => {
       </div>
 
       {/* 二级分类 Tabs */}
-      <div className="flex flex-wrap gap-3 px-10 pt-6 bg-base-200">
-        {subsForActive.map(({ subCategory }) => {
+      <div className="flex flex-wrap gap-3 px-10 pt-4 bg-base-200 mb-4">
+        {sortedSubs.map(({ subCategory, id }) => {
           const isActive = subCategory === activeSub
           return (
             <button
-              key={subCategory}
+              key={id}
               onClick={() => setActiveSub(subCategory)}
-              className={`
-                px-4 py-1 rounded-lg text-md transition
+              className={`px-4 py-2 rounded-lg text-md transition
                 ${isActive ? m.subActiveBg : m.subInactiveBg}
                 ${isActive ? 'text-white' : m.subInactiveText}
-                ${!isActive ? m.subHoverBg : ''}
-              `}
+                ${!isActive ? m.subHoverBg : ''}`}
             >
               {subCategory}
             </button>
@@ -168,7 +175,7 @@ const TodoList: React.FC<TodoListProps> = ({ todos }) => {
           {items.length > 0 ? (
             items.map(item => (
               <li
-                key={item.time + item.text}
+                key={item.id}
                 className="flex justify-between items-center border border-base-300 rounded-2xl px-8 py-4 bg-base-200"
               >
                 <label className="flex items-center gap-5">
@@ -179,22 +186,21 @@ const TodoList: React.FC<TodoListProps> = ({ todos }) => {
                     className={`w-7 h-7 ${m.checkboxAccent}`}
                   />
                   <span
-                    className={`text-xl font-medium text-base-content ${
-                      item.done ? 'opacity-60 line-through' : ''
-                    }`}
+                    className={`text-xl font-medium text-base-content ${item.done ? 'opacity-60 line-through' : ''}`}
                   >
                     {item.text}
                   </span>
                 </label>
-                <time className="text-sm text-base-content/60">
-                  {new Date(item.time).toISOString().split('T')[0]}
-                </time>
+                {/* 时间字段显示，如果为空则不显示 */}
+                {item.time && (
+                  <time className="text-sm text-base-content/60">
+                    {new Date(item.time).toISOString().split('T')[0]}
+                  </time>
+                )}
               </li>
             ))
           ) : (
-            <li className="text-center text-base-content/60 py-12">
-              暂无任务
-            </li>
+            <li className="text-center text-base-content/60 py-12">暂无任务</li>
           )}
         </ul>
       </div>
