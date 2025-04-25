@@ -16,7 +16,7 @@ export type Category = {
   sub: SubCategory[]
 }
 
-// 1. 把所有可能用到的色系写到这里
+// 仅用来控制按钮和复选框等高亮色，其它背景/文字都用 DaisyUI 变量
 const colorMap = {
   rose: {
     tabActiveBg: 'bg-rose-500',
@@ -28,7 +28,6 @@ const colorMap = {
     subInactiveBg: 'bg-rose-200',
     subInactiveText: 'text-rose-800',
     subHoverBg: 'hover:bg-rose-300',
-    itemBg: 'bg-rose-50',
     checkboxAccent: 'accent-rose-600',
   },
   emerald: {
@@ -41,7 +40,6 @@ const colorMap = {
     subInactiveBg: 'bg-emerald-200',
     subInactiveText: 'text-emerald-800',
     subHoverBg: 'hover:bg-emerald-300',
-    itemBg: 'bg-emerald-50',
     checkboxAccent: 'accent-emerald-600',
   },
   sky: {
@@ -54,7 +52,6 @@ const colorMap = {
     subInactiveBg: 'bg-sky-200',
     subInactiveText: 'text-sky-800',
     subHoverBg: 'hover:bg-sky-300',
-    itemBg: 'bg-sky-50',
     checkboxAccent: 'accent-sky-600',
   },
   indigo: {
@@ -67,7 +64,6 @@ const colorMap = {
     subInactiveBg: 'bg-indigo-200',
     subInactiveText: 'text-indigo-800',
     subHoverBg: 'hover:bg-indigo-300',
-    itemBg: 'bg-indigo-50',
     checkboxAccent: 'accent-indigo-600',
   },
   violet: {
@@ -80,7 +76,6 @@ const colorMap = {
     subInactiveBg: 'bg-violet-200',
     subInactiveText: 'text-violet-800',
     subHoverBg: 'hover:bg-violet-300',
-    itemBg: 'bg-violet-50',
     checkboxAccent: 'accent-violet-600',
   },
 } as const
@@ -90,10 +85,11 @@ interface TodoListProps {
 }
 
 const TodoList: React.FC<TodoListProps> = ({ todos }) => {
-  // 1. 一级分类
+  // 一级分类
   const [activeCat, setActiveCat] = useState(todos[0]?.category ?? '')
   const activeColor = todos.find(c => c.category === activeCat)?.color ?? 'rose'
-  // 2. 二级分类
+
+  // 二级分类
   const subsForActive = todos.find(c => c.category === activeCat)?.sub ?? []
   const [activeSub, setActiveSub] = useState(subsForActive[0]?.subCategory ?? '')
   useEffect(() => {
@@ -101,7 +97,7 @@ const TodoList: React.FC<TodoListProps> = ({ todos }) => {
     setActiveSub(subs[0]?.subCategory ?? '')
   }, [activeCat, todos])
 
-  // 3. 排序：未完成→完成 + 时间降序
+  // 排序：未完成→完成 + 时间降序
   const items = useMemo(() => {
     const list = todos
       .find(c => c.category === activeCat)
@@ -113,20 +109,18 @@ const TodoList: React.FC<TodoListProps> = ({ todos }) => {
     })
   }, [todos, activeCat, activeSub])
 
-  // 取映射
   const m = colorMap[activeColor]
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 bg-white rounded-3xl shadow-2xl overflow-hidden">
-      {/* 美化后的标题区：渐变背景 + Emoji */}
-      {/* <div className="px-10 py-6 flex items-center gap-4 bg-gradient-to-r from-rose-500 via-pink-500 to-yellow-500 rounded-t-3xl"> */}
-      <div className="px-10 py-6 flex items-center gap-4 bg-gradient-to-r from-green-400 via-teal-500 to-blue-400 rounded-t-3xl">
-         <span className="text-5xl select-none">📝</span>
-         <h2 className="text-4xl font-extrabold text-white">我的待办</h2>
-       </div>
+    <div className="max-w-3xl mx-auto mt-10 bg-base-100 rounded-3xl shadow-2xl overflow-hidden">
+      {/* 标题区 */}
+      <div className="px-10 py-6 flex items-center gap-4 bg-gradient-to-r from-green-400 via-teal-500 to-blue-400">
+        <span className="text-5xl select-none">📝</span>
+        <h2 className="text-4xl font-extrabold text-base-100">TodoLists</h2>
+      </div>
 
       {/* 一级分类 Tabs */}
-      <div className="flex flex-wrap gap-4 p-6 bg-gray-50">
+      <div className="flex flex-wrap gap-4 p-6 bg-base-200">
         {todos.map(({ category, color }) => {
           const mp = colorMap[color]
           const isActive = category === activeCat
@@ -148,7 +142,7 @@ const TodoList: React.FC<TodoListProps> = ({ todos }) => {
       </div>
 
       {/* 二级分类 Tabs */}
-      <div className="flex flex-wrap gap-3 px-10 pt-6">
+      <div className="flex flex-wrap gap-3 px-10 pt-6 bg-base-200">
         {subsForActive.map(({ subCategory }) => {
           const isActive = subCategory === activeSub
           return (
@@ -168,43 +162,37 @@ const TodoList: React.FC<TodoListProps> = ({ todos }) => {
         })}
       </div>
 
-      {/* 固定高度 + 滚动条 */}
-      <div className="px-10 py-6">
+      {/* 列表区 */}
+      <div className="px-10 py-6 bg-base-100">
         <ul className="space-y-4 overflow-y-auto h-[60vh] pr-2">
           {items.length > 0 ? (
             items.map(item => (
               <li
-                className={`
-                  flex justify-between items-center
-                  ${m.itemBg} rounded-2xl px-8 py-4
-                `}
+                key={item.time + item.text}
+                className="flex justify-between items-center border border-base-300 rounded-2xl px-8 py-4 bg-base-200"
               >
                 <label className="flex items-center gap-5">
                   <input
                     type="checkbox"
                     checked={item.done}
                     readOnly
-                    className={`
-                      w-7 h-7 ${m.checkboxAccent}
-                      ${item.done ? 'opacity-60' : ''}
-                    `}
+                    className={`w-7 h-7 ${m.checkboxAccent}`}
                   />
                   <span
-                    className={`
-                      text-xl font-medium
-                      ${item.done ? 'line-through text-gray-400' : 'text-gray-900'}
-                    `}
+                    className={`text-xl font-medium text-base-content ${
+                      item.done ? 'opacity-60 line-through' : ''
+                    }`}
                   >
                     {item.text}
                   </span>
                 </label>
-                <time className="text-sm text-gray-500">
-                    {new Date(item.time).toISOString().split('T')[0]}
+                <time className="text-sm text-base-content/60">
+                  {new Date(item.time).toISOString().split('T')[0]}
                 </time>
               </li>
             ))
           ) : (
-            <li className="text-center text-gray-400 py-12">
+            <li className="text-center text-base-content/60 py-12">
               暂无任务
             </li>
           )}

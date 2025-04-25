@@ -41,9 +41,9 @@ export const menuItems = [
     id: "todolists",
     text: "TodoLists",
     href: "/todolists",
-    svg: "material-symbols:checklist",
+    svg: "material-symbols:list",
     target: "_self",
-  }, // Projects page
+  }, // Todolist实 page
   {
     id: "project",
     text: "Project",
