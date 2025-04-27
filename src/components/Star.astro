@@ -1,0 +1,410 @@
+---
+const { categories } = Astro.props;
+// 辅助函数，把名字转成id（小写，空格换-）
+const generateId = (text) => text.replace(/\s+/g, '-').toLowerCase();
+---
+<div class="categories">
+  {categories.map((category, catIndex) => (
+    <div class="category" id={`category-${catIndex}`}>
+      <h2
+        id={`cat-title-${catIndex}`}
+        class="category-title"
+        onclick={`toggleCategory(${catIndex})`}
+      >
+        <span>{category.name}</span>
+        <span class="arrow" id={`cat-arrow-${catIndex}`}>&#9660;</span>
+      </h2>
+
+      <div class="collapsible open" id={`wrapper-${catIndex}`}>
+        <div class="subcategories" id={`subcategories-${catIndex}`}>
+          {category.subcategories.map((sub, subIndex) => (
+            <div class="subcategory" id={`subcategory-${catIndex}-${subIndex}`}>
+              <h3
+                class="subcategory-title"
+                id={generateId(sub.name)}
+                onclick={`toggleSubcategory(${catIndex}, ${subIndex})`}
+              >
+                <span>{sub.name}</span>
+                <span class="arrow" id={`subcat-arrow-${catIndex}-${subIndex}`}>&#9660;</span>
+              </h3>
+
+              <div class="collapsible" id={`wrapper-${catIndex}-${subIndex}`}>
+                <div
+                  class={sub.type==='movie' ? 'movie-grid' : 'bookmark-grid'}
+                  id={`grid-${catIndex}-${subIndex}`}
+                >
+                  {sub.items.map((item) =>
+                    sub.type==='movie' ? (
+                      <div class="movie-card">
+                        <a href={item.url} target="_blank" class="movie-poster">
+                          <img src={item.image} alt={item.title} class="movie-image"/>
+                          {item.desc && (
+                            <div class="movie-desc-overlay"><p>{item.desc}</p></div>
+                          )}
+                        </a>
+                        <a href={item.url} target="_blank" class="movie-title-link">
+                          {item.title}
+                        </a>
+                      </div>
+                    ) : (
+                      <div class="bookmark-card">
+                        <a href={item.url} target="_blank" class="image-wrapper">
+                          <img src={item.image} alt={item.title} class="card-image"/>
+                          <div class="card-desc"><p>{item.desc}</p></div>
+                        </a>
+                        <a href={item.url} target="_blank" class="card-title">
+                          {item.title}
+                        </a>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+
+            </div>
+          ))}
+        </div>
+      </div>
+
+    </div>
+  ))}
+</div>
+
+<script is:inline>
+  function toggleCollapse(wrapper, arrow) {
+    if (!wrapper) return;
+    const isOpen = wrapper.classList.contains('open');
+    wrapper.removeEventListener('transitionend', wrapper._afterExpand);
+    if (isOpen) {
+      // 收起
+      const curH = wrapper.scrollHeight + 'px';
+      wrapper.style.maxHeight = curH;
+      requestAnimationFrame(() => wrapper.style.maxHeight = '0px');
+      wrapper.classList.remove('open');
+      arrow.style.transform = 'rotate(-90deg)';
+    } else {
+      // 展开
+      wrapper.style.maxHeight = 'none';
+      wrapper.style.visibility = 'hidden';
+      const fullH = wrapper.scrollHeight + 'px';
+      wrapper.style.maxHeight = '0px';
+      wrapper.style.visibility = '';
+      wrapper.classList.add('open');
+      arrow.style.transform = 'rotate(0deg)';
+      wrapper.getBoundingClientRect();
+      wrapper.style.maxHeight = fullH;
+      wrapper._afterExpand = (e) => {
+        if (e.target===wrapper && wrapper.classList.contains('open')) {
+          wrapper.style.maxHeight = 'none';
+          wrapper.removeEventListener('transitionend', wrapper._afterExpand);
+        }
+      };
+      wrapper.addEventListener('transitionend', wrapper._afterExpand);
+    }
+  }
+
+  function toggleCategory(i) {
+    const wrapper = document.getElementById(`wrapper-${i}`);
+    const arrow   = document.getElementById(`cat-arrow-${i}`);
+    const header  = document.getElementById(`cat-title-${i}`);
+    toggleCollapse(wrapper, arrow);
+    header.classList.toggle('active');
+  }
+
+  function toggleSubcategory(i, j) {
+    const wrapper = document.getElementById(`wrapper-${i}-${j}`);
+    const arrow   = document.getElementById(`subcat-arrow-${i}-${j}`);
+    toggleCollapse(wrapper, arrow);
+  }
+
+  function expandToHash() {
+    const hash = location.hash.slice(1);
+    if (!hash) return;
+    const target = document.getElementById(hash);
+    if (!target) return;
+    // 展开一级
+    const catDiv = target.closest('.category');
+    if (catDiv) {
+      const idx = +catDiv.id.split('-')[1];
+      const w = catDiv.querySelector(':scope > .collapsible');
+      const a = document.getElementById(`cat-arrow-${idx}`);
+      const h = document.getElementById(`cat-title-${idx}`);
+      if (w && !w.classList.contains('open')) {
+        toggleCollapse(w, a);
+        h.classList.add('active');
+      }
+    }
+    // 展开二级
+    const subDiv = target.closest('.subcategory');
+    if (subDiv) {
+      const [_, ci, si] = subDiv.id.split('-').map(Number);
+      const w = document.getElementById(`wrapper-${ci}-${si}`);
+      const a = document.getElementById(`subcat-arrow-${ci}-${si}`);
+      if (w && !w.classList.contains('open')) toggleCollapse(w, a);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+  if (location.hash) {
+    expandToHash();
+  } else {
+    // 没有 hash 时，默认展开第一项（可删或改成你想展开的项）
+    toggleCategory(0);
+  }
+  window.addEventListener('hashchange', expandToHash);
+});
+</script>
+
+<style>
+.categories {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 2rem 0;
+  font-family: system-ui, sans-serif;
+}
+
+/* 折叠容器 */
+.collapsible {
+  overflow: hidden;
+  max-height: none;
+  transition: max-height 0.4s ease;
+  width: 100%;
+}
+.collapsible:not(.open) {
+  max-height: 0;
+}
+
+/* 一级标题 */
+.category-title {
+  font-weight: 700;
+  padding: 1rem 1.2rem;
+  border-radius: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 2rem;
+  background: linear-gradient(to right, #dee4ea, #f7f9fb);
+  color: #1a1a1a;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: background 0.3s, box-shadow 0.3s, color 0.3s;
+}
+.category-title.active {
+  color: #0070f3;
+}
+/* hover 保持原来逻辑 */
+.category-title:hover {
+  background: linear-gradient(to right, #d0d9e0, #eff2f6);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  color: #0070f3;
+}
+
+/* 二级标题 */
+.subcategory {
+  margin-top: 1.5rem;
+  padding-left: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+.subcategory-title {
+  font-weight: 600;
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.4rem;
+  background: linear-gradient(to right, #f2f4f7, #ffffff);
+  color: #2c3e50;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+}
+.subcategory-title:hover {
+  background: linear-gradient(to right, #e4e7ec, #fafbfc);
+  color: #0056cc;
+}
+
+/* 箭头 */
+.arrow {
+  font-size: 1.2rem;
+  transition: transform 0.3s;
+  color: #888;
+}
+
+
+/* 网站卡片 Bookmark */
+.bookmark-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  justify-content: flex-start;
+}
+
+.bookmark-card {
+  width: calc((100% - 3rem) / 4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.bookmark-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
+
+.image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%;
+  overflow: hidden;
+}
+
+.card-image {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.bookmark-card:hover .card-image {
+  transform: scale(1.04);
+}
+
+.card-desc {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  opacity: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.8rem;
+  transition: opacity 0.4s ease;
+}
+
+.image-wrapper:hover .card-desc {
+  opacity: 1;
+}
+
+.card-title {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 0.4rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1rem;
+  background: #fff;
+  border-radius: 0 0 12px 12px;
+  transition: background 0.3s ease;
+  color: #2c3e50;
+  text-decoration: none;
+}
+
+.card-title:hover {
+  background: #f0f0f0;
+  text-decoration: underline;
+}
+
+/* 电影卡片 Movie */
+.movie-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  justify-content: flex-start;
+}
+
+.movie-card {
+  width: calc((100% - 3rem) / 4);
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  text-align: center;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  position: relative;
+}
+
+.movie-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
+
+.movie-poster {
+  width: 100%;
+  aspect-ratio: 2/3;
+  overflow: hidden;
+  position: relative;
+}
+
+.movie-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  transition: transform 0.4s ease;
+}
+
+.movie-card:hover .movie-image {
+  transform: scale(1.04);
+}
+
+.movie-desc-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  opacity: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.8rem;
+  transition: opacity 0.4s ease;
+}
+
+.movie-poster:hover .movie-desc-overlay {
+  opacity: 1;
+}
+
+.movie-title-link {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 0.4rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1rem;
+  background: #fff;
+  border-radius: 0 0 12px 12px;
+  transition: background 0.3s ease;
+  color: #2c3e50;
+  text-decoration: none;
+}
+
+.movie-title-link:hover {
+  background: #f0f0f0;
+  text-decoration: underline;
+}
+
+/* TOC高亮 */
+.toc-link.active {
+  color: #0070f3;
+  font-weight: bold;
+  border-left: 3px solid #0070f3;
+  padding-left: 0.5rem;
+}
+</style>

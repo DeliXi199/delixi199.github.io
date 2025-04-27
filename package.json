@@ -55,6 +55,7 @@
     "remark-directive": "^3.0.0",
     "remark-math": "^6.0.0",
     "shiki": "^1.26.1",
+    "styled-components": "^6.1.17",
     "swup": "^4.8.1",
     "typescript": "^5.7.2",
     "unist-util-visit": "^5.0.0"
@@ -68,6 +69,7 @@
     "@iconify/tailwind": "^1.2.0",
     "@rollup/plugin-terser": "^0.4.4",
     "@tailwindcss/typography": "^0.5.15",
+    "@types/styled-components": "^5.1.34",
     "astro-eslint-parser": "^1.1.0",
     "daisyui": "^4.12.23",
     "eslint": "^9.17.0",

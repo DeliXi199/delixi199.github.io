@@ -1,0 +1,179 @@
+import BaseLayout from "../layouts/BaseLayout.astro";
+import BaseCard from "../components/BaseCard.astro";
+import Star from "../components/Star.astro";
+
+<BaseLayout title="Star">
+  <BaseCard title="我的收藏">
+# 我的收藏夹
+
+收录一些精选的网站和推荐的电影🎬
+
+---
+
+  </BaseCard>
+
+  <Star
+    categories={[
+      {
+        name: "网站",
+        subcategories: [
+          {
+            name: "工具网站",
+            type: "website", // 网站类型卡片
+            items: [
+              {
+                title: "ChatGPT",
+                url: "https://chatgpt.com/",
+                desc: "通用AI聊天网站，最综合实用",
+                image: "https://th.bing.com/th/id/OIP.bIwZM7d8igWwwEr9UIeqpgHaHa?rs=1&pid=ImgDetMain",
+              },
+              {
+                title: "Gemini",
+                url: "https://gemini.google.com/u/1/app",
+                desc: "适用于文献阅读，信息网络查询的AI",
+                image: "https://th.bing.com/th/id/OIP.mcVw3antknFknCTjbJMO4QHaEK?rs=1&pid=ImgDetMain",
+              },
+              {
+                title: "Github",
+                url: "https://github.com",
+                desc: "代码托管平台，提供版本控制，协作开发等功能",
+                image: "https://cloud-elements.com/wp-content/uploads/2019/01/github-logo-6004.jpg",
+              },
+              {
+                title: "Google Scholar",
+                url: "https://scholar.google.com/",
+                desc: "学术搜索引擎，提供海量的学术文献",
+                image: "https://th.bing.com/th/id/OIP.2Xuzk1VnokJdOeEckYXtNAHaHU?rs=1&pid=ImgDetMain",
+              },
+              {
+                title: "Tables Generator",
+                url: "https://www.tablesgenerator.com/",
+                desc: "Latex表格生成器",
+                image: "https://www.elegantthemes.com/blog/wp-content/uploads/2021/02/lead-magnet-ideas-section-images-Recovered_Spreadsheet-610x280.jpg",
+              },
+            ]
+          },
+          {
+            name: "资源网站",
+            type: "website",
+            items: [
+              {
+                title: "片吧",
+                url: "https://d.pianbar.cc/",
+                desc: "有大量的磁力电影资源",
+                image: "https://tse3-mm.cn.bing.net/th/id/OIP-C.VteGELfHNztLYFMgCQxL4gAAAA?rs=1&pid=ImgDetMain",
+              },
+              {
+                title: "66影视",
+                url: "https://www.5266ys.net/",
+                desc: "电影资源也挺多的，可以作为片吧的补充",
+                image: "https://ts1.tc.mm.bing.net/th/id/R-C.c27614763eacf5548830f8fa259abdc8?rik=9GaGIrUR80ep7g&riu=http%3a%2f%2fpic.qqtf.com%2fup%2f2021-2%2f2021223927537011.png&ehk=vA%2bLU7kgrwM3lRvKoUTcHkndhWdOoRc6kOTmj25FRPM%3d&risl=&pid=ImgRaw&r=0",
+              },
+            ]
+          },
+          {
+            name: "网页收藏",
+            type: "website",
+            items: [
+              {
+                title: "我的博客",
+                url: "https://blog.yuanshen.site",
+                desc: "记录生活，分享技术",
+                image: "https://blog.yuanshen.site/images/avatar.png",
+              },
+            ]
+          },
+          {
+            name: "Bilibili",
+            type: "website",
+            items: [
+              {
+                title: "小回回的世界攻略",
+                url: "https://space.bilibili.com/13476073?spm_id_from=333.337.0.0",
+                desc: "我姓回/鹅厂裸辞/野生旅行家/民间单身养老院院长",
+                image: "/image/Bilibili/小回回的世界攻略.png",
+              },
+              {
+                title: "春雨梦游记",
+                url: "https://space.bilibili.com/505971934?spm_id_from=333.337.0.0",
+                desc: "讲一些真实美好的故事",
+                image: "/image/Bilibili/春雨梦游记.png",
+              },
+              {
+                title: "陈翔六点半",
+                url: "https://space.bilibili.com/19286458?spm_id_from=333.337.0.0",
+                desc: "陈翔导演作品，让快乐为你加速！",
+                image: "/image/Bilibili/陈翔六点半.png",
+              },
+            ]
+          }
+        ]
+      },
+      {
+        name: "影视作品",
+        subcategories: [
+          {
+            name: "电影",
+            type: "movie", // 电影类型卡片
+            items: [
+              {
+                title: "Life of Pi(少年派的奇幻漂流)",
+                url: "https://movie.douban.com/subject/1929463/",
+                desc: "用奇幻的故事、童话的画风来讲现实的故事（2012/剧情/奇幻/冒险/李安导演）",
+                image: "https://nenya.doubanio.com/view/photo/xl/public/p1784592701.jpg?sa_cv=f6be84d3a866065d662b3385d6203cfa&sa_ct=680cbb3e",
+              },
+              {
+                title: "陈翔六点半之重楼别",
+                url: "https://movie.douban.com/subject/34454654/",
+                desc: "滇戏中的重楼别也是人生中的重楼别，愿真诚不被辜负（2019/喜剧/爱情/戏曲/陈翔导演）",
+                image: "https://nenya.doubanio.com/view/photo/xl/public/p2562661805.jpg?sa_cv=52035319584b41d7842d4ffd54a8ee2f&sa_ct=680cc026",
+              },
+              {
+                title: "陈翔六点半之拳王妈妈",
+                url: "https://movie.douban.com/subject/35768795/",
+                desc: "冷萌主演的电影自然不能错过。生活中不是努力就能成功，有时也不知在为什么而努力，但是以后回过头来会发现自己已经走得很远（2022/喜剧/动作/陈翔导演）",
+                image: "https://nenya.doubanio.com/view/photo/xl/public/p2868488130.jpg?sa_cv=e2181689712105c89a6ce25315a0c8ff&sa_ct=680cc37b",
+              },
+            ]
+          },
+          {
+            name: "电视剧",
+            type: "movie",
+            items: [
+              {
+                title: "Game of Thrones Season 1(权利的游戏)",
+                url: "https://movie.douban.com/subject/3016187/",
+                desc: "（2011/剧情/奇幻/冒险）",
+                image: "https://nenya.doubanio.com/view/photo/xl/public/p896064368.jpg?sa_cv=3b5c10126feb2118d434a86c17902d5c&sa_ct=680d9b77",
+              },
+              {
+                title: "Game of Thrones Season 2(权利的游戏)",
+                url: "https://movie.douban.com/subject/3016187/",
+                desc: "（2012/剧情/奇幻/冒险）",
+                image: "https://nenya.doubanio.com/view/photo/xl/public/p1441478479.jpg?sa_cv=cbcb9f317018ef19f4af6b3be60510ac&sa_ct=680d9c79",
+              },
+              {
+                title: "Game of Thrones Season 1(权利的游戏)",
+                url: "https://movie.douban.com/subject/3016187/",
+                desc: "（2011/剧情/奇幻/冒险）",
+                image: "https://nenya.doubanio.com/view/photo/xl/public/p896064368.jpg?sa_cv=3b5c10126feb2118d434a86c17902d5c&sa_ct=680d9b77",
+              },
+              {
+                title: "Game of Thrones Season 1(权利的游戏)",
+                url: "https://movie.douban.com/subject/3016187/",
+                desc: "（2011/剧情/奇幻/冒险）",
+                image: "https://nenya.doubanio.com/view/photo/xl/public/p896064368.jpg?sa_cv=3b5c10126feb2118d434a86c17902d5c&sa_ct=680d9b77",
+              },
+              {
+                title: "Game of Thrones Season 1(权利的游戏)",
+                url: "https://movie.douban.com/subject/3016187/",
+                desc: "（2011/剧情/奇幻/冒险）",
+                image: "https://nenya.doubanio.com/view/photo/xl/public/p896064368.jpg?sa_cv=3b5c10126feb2118d434a86c17902d5c&sa_ct=680d9b77",
+              },
+            ]
+          }
+        ]
+      }
+    ]}
+  />
+</BaseLayout>
