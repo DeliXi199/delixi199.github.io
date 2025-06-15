@@ -1,7 +1,13 @@
 ---
-const { categories } = Astro.props;
+interface Item { title: string; url: string; image?: string; desc?: string; content?: string; }
+interface Subcategory { name: string; type: 'movie'|'website'|'bookmark'|'book'; items: Item[] }
+interface Category { name: string; subcategories: Subcategory[] }
+
+const { categories } = Astro.props as { categories: Category[] };
+
 // 把名字转成 id（小写，空格换-）
-const generateId = (text) => text.replace(/\s+/g, '-').toLowerCase();
+const generateId = (text: string): string =>
+  text.replace(/\s+/g, '-').toLowerCase();
 ---
 <div class="categories">
   {categories.map((category, catIndex) => (
