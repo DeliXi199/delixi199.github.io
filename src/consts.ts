@@ -38,6 +38,13 @@ export const menuItems = [
     target: "_self",
   }, // Blog page with sub-items
   {
+    id: "gallery",
+    text: "Gallery",
+    href: "/gallery0",
+    svg: "material-symbols:image",
+    target: "_self",
+  }, // Blog page with sub-items
+  {
     id: "star",
     text: "Star",
     href: "/star",

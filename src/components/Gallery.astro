@@ -1,0 +1,103 @@
+---
+import { onMount } from "astro/client";
+---
+
+<style>
+/* 此处粘贴你的 CSS 样式，不含 <style> 标签 */
+</style>
+
+<section class="py-10">
+  <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+    <span class="i-lucide:image w-6 h-6 text-primary"></span>
+    <span>Interactive Gallery</span>
+  </h2>
+
+  <div class="controls text-center mb-6">
+    <button id="shuffleBtn" class="btn">随机排序</button>
+    <button id="sortBtn" class="btn">顺序排列</button>
+    <button id="reverseBtn" class="btn">倒序排列</button>
+  </div>
+
+  <ul id="gallery" class="flex flex-wrap justify-center gap-6">
+    <li><div class="photo"><img src="/1.jpg" alt="第 1 张图" /><div class="caption">第 1 张图</div></div></li>
+    <li><div class="photo"><img src="/2.jpg" alt="第 2 张图" /><div class="caption">第 2 张图</div></div></li>
+    <li><div class="photo"><img src="/3.jpg" alt="第 3 张图" /><div class="caption">第 3 张图</div></div></li>
+    <li><div class="photo"><img src="/4.jpg" alt="第 4 张图" /><div class="caption">第 4 张图</div></div></li>
+    <li><div class="photo"><img src="/2.jpg" alt="第 2 张图" /><div class="caption">第 2 张图</div></div></li>
+    <li><div class="photo"><img src="/1.jpg" alt="第 1 张图" /><div class="caption">第 1 张图</div></div></li>
+    <li><div class="photo"><img src="/3.jpg" alt="第 3 张图" /><div class="caption">第 3 张图</div></div></li>
+    <li><div class="photo"><img src="/4.jpg" alt="第 4 张图" /><div class="caption">第 4 张图</div></div></li>
+  </ul>
+
+  <div id="lightbox" class="fixed inset-0 hidden items-center justify-center bg-black/80 z-50">
+    <img src="" alt="放大图" class="max-w-[90vw] max-h-[90vh] shadow-2xl" />
+  </div>
+
+  <script type="module" is:inline>
+    const ul = document.getElementById('gallery');
+    const originalItems = Array.from(ul.children);
+    let currentItems = [...originalItems];
+
+    const BASE_LONG = 300, MIN_F = 0.9, MAX_F = 1.1;
+
+    function applyRandomSize() {
+      document.querySelectorAll('.photo img').forEach(img => {
+        function resize() {
+          const { naturalWidth: w, naturalHeight: h } = img;
+          const factor = MIN_F + Math.random() * (MAX_F - MIN_F);
+          const target = BASE_LONG * factor;
+          w >= h ? img.style.width = target + 'px' : img.style.height = target + 'px';
+        }
+        img.complete ? resize() : img.onload = resize;
+      });
+    }
+
+    function applyRandomRotation() {
+      document.querySelectorAll('#gallery li').forEach(li => {
+        const a = (Math.random() * 20 - 10).toFixed(2);
+        li.style.transform = `rotate(${a}deg)`;
+      });
+    }
+
+    function renderItems(items) {
+      ul.innerHTML = '';
+      items.forEach(item => ul.appendChild(item));
+      applyRandomSize();
+      applyRandomRotation();
+      bindClickEvents();
+    }
+
+    function bindClickEvents() {
+      document.querySelectorAll('#gallery li').forEach(li => {
+        li.onclick = () => {
+          document.getElementById('lightbox').style.display = 'flex';
+          document.querySelector('#lightbox img').src = li.querySelector('img').src;
+        };
+      });
+    }
+
+    currentItems = [...originalItems].sort(() => Math.random() - 0.5);
+    renderItems(currentItems);
+
+    document.getElementById('shuffleBtn').onclick = () => {
+      currentItems.sort(() => Math.random() - 0.5);
+      renderItems(currentItems);
+    };
+
+    document.getElementById('sortBtn').onclick = () => {
+      currentItems = [...originalItems];
+      renderItems(currentItems);
+    };
+
+    document.getElementById('reverseBtn').onclick = () => {
+      currentItems = [...originalItems].reverse();
+      renderItems(currentItems);
+    };
+
+    document.getElementById('lightbox').onclick = () =>
+      document.getElementById('lightbox').style.display = 'none';
+
+    document.onkeydown = e => e.key === 'Escape' &&
+      (document.getElementById('lightbox').style.display = 'none');
+  </script>
+</section>

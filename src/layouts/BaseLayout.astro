@@ -50,10 +50,11 @@ const { title, image } = Astro.props;
   <body>
     <Navbar title={SITE_TITLE} />
 
-    <div class="max-w-6xl mx-auto">
-      <div class="relative grid gap-4 p-0 lg:p-4 md:grid-cols-5 lg:grid-cols-4 top-20 md:top-0 text-base lg:text-lg">
-        {/* Sidebar */}
-        <aside class="md:col-span-1 top-4 p-2 hidden md:block order-2 md:order-1 space-y-4">
+    <div class="max-w-[1440px] mx-auto px-4">
+      <div class="flex gap-4 pt-4">
+    
+        <!-- Sidebar 固定宽度 -->
+        <aside class="w-[260px] shrink-0 hidden md:block space-y-4">
           <Profile />
           <CategoryCard />
           <TagCard />
@@ -62,16 +63,21 @@ const { title, image } = Astro.props;
             <TocCard />
           </div>
         </aside>
-
-        {/* Main Content */}
-        <main id="swup" class="col-span-3 md:col-span-4 lg:col-span-3 p-2 order-1 md:order-2">
+    
+        <!-- Main Content 自适应 -->
+        <main id="swup" class="flex-1 min-w-0">
           <div class="grid gap-8 fade-in-up">
             <slot />
             <Footer />
           </div>
         </main>
+    
       </div>
     </div>
+    
+    
+    
+  </div>
   </body>
 </html>
 
