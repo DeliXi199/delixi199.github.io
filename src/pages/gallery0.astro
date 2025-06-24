@@ -1,33 +1,35 @@
 ---
+// src/pages/gallery.astro
+
 import fs from 'node:fs';
 import path from 'node:path';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BaseCard from '../components/BaseCard.astro';
 import GalleryClient from '../components/GalleryClient.jsx';
 
-// 从 public/image/Gallery 目录读取图片文件名
+// 1）服务端读取图片和描述
 const imageDir = path.resolve('./public/image/Gallery');
 const files = fs.readdirSync(imageDir)
   .filter(name => /\.(jpe?g|png|webp|gif)$/i.test(name))
   .sort((a, b) => a.localeCompare(b, 'zh-Hans-CN', { numeric: true }));
 
-// 从 descriptions.md 读取每行描述
-const descriptionPath = path.resolve('./public/image/Gallery/descriptions.md');
-const captions = fs.readFileSync(descriptionPath, 'utf-8')
+const captions = fs.readFileSync(path.resolve(imageDir, 'descriptions.md'), 'utf-8')
   .split('\n')
   .map(line => line.replace(/^\d+\.?\s*/, '').trim())
   .filter(line => line.length > 0);
 
-// 构造 images 数组
-const images = files.map((filename, i) => ({
-  src: `/image/Gallery/${filename}`,
+const images = files.map((file, i) => ({
+  src: `/image/Gallery/${file}`,
   caption: captions[i] || ''
 }));
 ---
 
 <BaseLayout title="Gallery">
   <BaseCard title="画廊展示">
-    <!-- 只挂载客户端组件，所有浏览器 API 都放到下面的 React 组件里 -->
+    {/*
+      2）**不在这里使用任何 document/window**
+      3）一切渲染、排序、Lightbox、随机尺寸都交给下面这个客户端组件
+    */}
     <GalleryClient client:load images={images} />
   </BaseCard>
 </BaseLayout>
