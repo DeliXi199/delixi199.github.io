@@ -5,18 +5,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import BaseCard from '../components/BaseCard.astro';
 import GalleryClient from '../components/GalleryClient.jsx';
 
+// 从 public/image/Gallery 目录读取图片文件名
 const imageDir = path.resolve('./public/image/Gallery');
-const descriptionPath = path.resolve('./public/image/Gallery/descriptions.md');
-
 const files = fs.readdirSync(imageDir)
   .filter(name => /\.(jpe?g|png|webp|gif)$/i.test(name))
   .sort((a, b) => a.localeCompare(b, 'zh-Hans-CN', { numeric: true }));
 
+// 从 descriptions.md 读取每行描述
+const descriptionPath = path.resolve('./public/image/Gallery/descriptions.md');
 const captions = fs.readFileSync(descriptionPath, 'utf-8')
   .split('\n')
   .map(line => line.replace(/^\d+\.?\s*/, '').trim())
   .filter(line => line.length > 0);
 
+// 构造 images 数组
 const images = files.map((filename, i) => ({
   src: `/image/Gallery/${filename}`,
   caption: captions[i] || ''
@@ -25,7 +27,7 @@ const images = files.map((filename, i) => ({
 
 <BaseLayout title="Gallery">
   <BaseCard title="画廊展示">
-    <!-- 只保留挂载点，交给 React 完全渲染 -->
+    <!-- 只挂载客户端组件，所有浏览器 API 都放到下面的 React 组件里 -->
     <GalleryClient client:load images={images} />
   </BaseCard>
 </BaseLayout>
