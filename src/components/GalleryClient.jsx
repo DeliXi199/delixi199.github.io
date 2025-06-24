@@ -21,7 +21,7 @@ export default function GalleryClient({ images }) {
   //    • 生成固定尺寸因子 factors  
   //    • 生成初始 transforms  
   useEffect(() => {
-    setItems(images);
+    setItems(shuffle(images));
 
     const fMap = {};
     images.forEach(img => {
