@@ -1,22 +1,21 @@
 ---
-// src/pages/gallery.astro
-
 import fs from 'node:fs';
 import path from 'node:path';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BaseCard from '../components/BaseCard.astro';
 import GalleryClient from '../components/GalleryClient.jsx';
 
-// 1）服务端读取图片和描述
+// ★ 服务端读取图片和描述，不使用任何浏览器 API
 const imageDir = path.resolve('./public/image/Gallery');
 const files = fs.readdirSync(imageDir)
   .filter(name => /\.(jpe?g|png|webp|gif)$/i.test(name))
   .sort((a, b) => a.localeCompare(b, 'zh-Hans-CN', { numeric: true }));
 
-const captions = fs.readFileSync(path.resolve(imageDir, 'descriptions.md'), 'utf-8')
+const captions = fs
+  .readFileSync(path.resolve(imageDir, 'descriptions.md'), 'utf-8')
   .split('\n')
   .map(line => line.replace(/^\d+\.?\s*/, '').trim())
-  .filter(line => line.length > 0);
+  .filter(Boolean);
 
 const images = files.map((file, i) => ({
   src: `/image/Gallery/${file}`,
@@ -27,8 +26,8 @@ const images = files.map((file, i) => ({
 <BaseLayout title="Gallery">
   <BaseCard title="画廊展示">
     {/*
-      2）**不在这里使用任何 document/window**
-      3）一切渲染、排序、Lightbox、随机尺寸都交给下面这个客户端组件
+      这里绝对不要写 document / window / querySelector
+      所有交互与 DOM 操作都交给下面这个客户端组件
     */}
     <GalleryClient client:load images={images} />
   </BaseCard>
