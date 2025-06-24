@@ -40,7 +40,7 @@ export const menuItems = [
   {
     id: "gallery",
     text: "Gallery",
-    href: "/gallery0",
+    href: "/gallery",
     svg: "material-symbols:image",
     target: "_self",
   }, // Blog page with sub-items
