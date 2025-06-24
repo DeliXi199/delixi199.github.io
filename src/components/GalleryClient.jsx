@@ -209,7 +209,7 @@ export default function GalleryClient({ images }) {
         /* ======== 移动端等比例缩放 ======== */
         @media (max-width: 768px) {
           .gallery-container {
-            transform: scale(0.8);
+            transform: scale(0.6);
             transform-origin: top center;
           }
         }
