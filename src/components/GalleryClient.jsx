@@ -1,3 +1,5 @@
+// src/components/GalleryClient.jsx
+
 import { useState, useEffect } from 'react';
 
 export default function GalleryClient({ images }) {
@@ -16,31 +18,37 @@ export default function GalleryClient({ images }) {
   // 常量：基准长度与随机因子范围
   const BASE = 270, MIN_F = 0.9, MAX_F = 1.1;
 
-  // ① images 初次或更新时：
-  //    • 同步 items  
-  //    • 生成固定尺寸因子 factors  
-  //    • 生成初始 transforms  
+  // Fisher–Yates 洗牌
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // ① images 初次或更新时：随机排列 + 生成 factors/transforms
   useEffect(() => {
-    setItems(shuffle(images));
+    setItems(shuffle(images)); // 默认随机排列
 
     const fMap = {};
-    images.forEach(img => {
-      fMap[img.src] = MIN_F + Math.random() * (MAX_F - MIN_F);
-    });
-    setFactors(fMap);
-
     const tMap = {};
     images.forEach(img => {
+      // 固定尺寸因子
+      fMap[img.src] = MIN_F + Math.random() * (MAX_F - MIN_F);
+      // 初始随机旋转/偏移
       const a = (Math.random() * 20 - 10).toFixed(2);
       const x = (Math.random() * 20 - 10).toFixed(2);
       const y = (Math.random() * 20 - 10).toFixed(2);
       tMap[img.src] = `translate(${x}px, ${y}px) rotate(${a}deg)`;
     });
+    setFactors(fMap);
     setTransforms(tMap);
     // 注意：不清空 styles，保证 onLoad 只执行一次
   }, [images]);
 
-  // ② 每次 items（顺序）变化时，只更新 transforms
+  // ② 每次 items（顺序）变化时，只刷新 transforms
   useEffect(() => {
     const tMap = {};
     items.forEach(img => {
@@ -52,24 +60,13 @@ export default function GalleryClient({ images }) {
     setTransforms(tMap);
   }, [items]);
 
-  // Fisher–Yates 随机排序
-  function shuffle(arr) {
-    const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  }
-
-  // 图片加载完成后，根据固定因子计算宽高，且只执行一次
+  // ③ 图片加载完成后，根据固定因子计算尺寸，且只执行一次
   function handleLoad(e, src) {
     if (styles[src]) return;
     const img = e.target;
     const w = img.naturalWidth;
     const h = img.naturalHeight;
-    const factor = factors[src];
-    const size = BASE * factor;
+    const size = BASE * factors[src];
     const style = w >= h
       ? { width: `${size}px`, height: 'auto' }
       : { height: `${size}px`, width: 'auto' };
@@ -207,6 +204,14 @@ export default function GalleryClient({ images }) {
           max-width: 90vw;
           max-height: 90vh;
           box-shadow: 0 0 30px rgba(0,0,0,0.6);
+        }
+
+        /* ======== 移动端等比例缩放 ======== */
+        @media (max-width: 768px) {
+          .gallery-container {
+            transform: scale(0.8);
+            transform-origin: top center;
+          }
         }
       `}</style>
 
