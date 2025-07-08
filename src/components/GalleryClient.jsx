@@ -1,24 +1,21 @@
 // src/components/GalleryClient.jsx
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 export default function GalleryClient({ images }) {
-  // 当前渲染顺序
   const [items, setItems] = useState([]);
-  // 每张图的固定随机尺寸因子，key 用 src
   const [factors, setFactors] = useState({});
-  // 每张图的旋转和偏移样式，key 用 src
   const [transforms, setTransforms] = useState({});
-  // 每张图的宽高样式，key 用 src
   const [styles, setStyles] = useState({});
-  // Lightbox 状态
   const [lightboxSrc, setLightboxSrc] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
-  // 常量：基准长度与随机因子范围
-  const BASE = 270, MIN_F = 0.9, MAX_F = 1.1;
+  const BASE = 270;
+  const MIN_F = 0.9;
+  const MAX_F = 1.1;
+  const ANGLE_RANGE = 10; // 最大倾斜度 ±10°
 
-  // Fisher–Yates 洗牌
   function shuffle(arr) {
     const a = [...arr];
     for (let i = a.length - 1; i > 0; i--) {
@@ -28,49 +25,78 @@ export default function GalleryClient({ images }) {
     return a;
   }
 
-  // ① images 初次或更新时：随机排列 + 生成 factors/transforms
-  useEffect(() => {
-    setItems(shuffle(images)); // 默认随机排列
-
-    const fMap = {};
-    const tMap = {};
-    images.forEach(img => {
-      // 固定尺寸因子
-      fMap[img.src] = MIN_F + Math.random() * (MAX_F - MIN_F);
-      // 初始随机旋转/偏移
-      const a = (Math.random() * 20 - 10).toFixed(2);
+  function genTransformMaps(list) {
+    const oMap = {}, rMap = {};
+    list.forEach(img => {
       const x = (Math.random() * 20 - 10).toFixed(2);
       const y = (Math.random() * 20 - 10).toFixed(2);
-      tMap[img.src] = `translate(${x}px, ${y}px) rotate(${a}deg)`;
+      oMap[img.src] = `translate(${x}px, ${y}px)`;
+      const angle = (Math.random() * ANGLE_RANGE * 2 - ANGLE_RANGE).toFixed(2);
+      rMap[img.src] = `rotate(${angle}deg)`;
+    });
+    return { oMap, rMap };
+  }
+
+  useEffect(() => {
+    setItems(shuffle(images));
+    const fMap = {};
+    images.forEach(img => {
+      fMap[img.src] = MIN_F + Math.random() * (MAX_F - MIN_F);
     });
     setFactors(fMap);
-    setTransforms(tMap);
-    // 注意：不清空 styles，保证 onLoad 只执行一次
+
+    const { oMap, rMap } = genTransformMaps(images);
+    setTransforms(oMap);
+    setTimeout(() => {
+      const fullMap = {};
+      images.forEach(img => {
+        fullMap[img.src] = `${oMap[img.src]} ${rMap[img.src]}`;
+      });
+      setTransforms(fullMap);
+    }, 100);
   }, [images]);
 
-  // ② 每次 items（顺序）变化时，只刷新 transforms
   useEffect(() => {
-    const tMap = {};
-    items.forEach(img => {
-      const a = (Math.random() * 20 - 10).toFixed(2);
-      const x = (Math.random() * 20 - 10).toFixed(2);
-      const y = (Math.random() * 20 - 10).toFixed(2);
-      tMap[img.src] = `translate(${x}px, ${y}px) rotate(${a}deg)`;
-    });
-    setTransforms(tMap);
+    const { oMap, rMap } = genTransformMaps(items);
+    setTransforms(oMap);
+    setTimeout(() => {
+      const fullMap = {};
+      items.forEach(img => {
+        fullMap[img.src] = `${oMap[img.src]} ${rMap[img.src]}`;
+      });
+      setTransforms(fullMap);
+    }, 100);
   }, [items]);
 
-  // ③ 图片加载完成后，根据固定因子计算尺寸，且只执行一次
   function handleLoad(e, src) {
     if (styles[src]) return;
     const img = e.target;
-    const w = img.naturalWidth;
-    const h = img.naturalHeight;
     const size = BASE * factors[src];
-    const style = w >= h
+    const style = img.naturalWidth >= img.naturalHeight
       ? { width: `${size}px`, height: 'auto' }
       : { height: `${size}px`, width: 'auto' };
     setStyles(prev => ({ ...prev, [src]: style }));
+  }
+
+  function Lightbox({ src, onClose }) {
+    return createPortal(
+      <div
+        onClick={onClose}
+        style={{
+          position: 'fixed', inset: 0,
+          background: 'rgba(0,0,0,0.8)',
+          display: 'flex', justifyContent: 'center', alignItems: 'center',
+          zIndex: 9999,
+        }}
+      >
+        <img
+          src={src}
+          alt="Preview"
+          style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain' }}
+        />
+      </div>,
+      document.body
+    );
   }
 
   return (
@@ -120,13 +146,14 @@ export default function GalleryClient({ images }) {
             0 10px 20px rgba(0,0,0,0.3);
           position: relative;
           top: 50px;
-          transition: all .6s ease;
+          transition: transform 0.6s ease, top 0.6s ease, opacity 0.6s ease;
           cursor: zoom-in;
+          transform-origin: center center;
         }
         .gallery-container ul li:hover {
           transform: scale(1.05);
           top: 0;
-          opacity: .9;
+          opacity: 0.9;
           z-index: 1;
         }
         .gallery-container ul li::after {
@@ -151,16 +178,14 @@ export default function GalleryClient({ images }) {
           width: 4px; height: 18px;
           background: linear-gradient(
             to bottom,
-            #ccc 0%, #999 50%, #666 100%);
+            #ccc 0%, #999 50%, #666 100%
+          );
           border-radius: 2px;
           box-shadow:
             inset 0 1px 1px rgba(255,255,255,0.6),
             0 1px 2px rgba(0,0,0,0.3);
           transform: rotate(15deg);
           pointer-events: none;
-        }
-        .gallery-container .photo {
-          position: relative;
         }
         .gallery-container .photo img {
           display: block;
@@ -172,8 +197,10 @@ export default function GalleryClient({ images }) {
         }
         .gallery-container .caption {
           position: absolute;
-          top: 0; left: 0;
-          width: 100%; height: 100%;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -188,30 +215,8 @@ export default function GalleryClient({ images }) {
           opacity: 1;
           transition-delay: 0.8s;
         }
-        .gallery-container #lightbox {
-          display: none;
-          position: fixed;
-          inset: 0;
-          background: rgba(0,0,0,0.8);
-          justify-content: center;
-          align-items: center;
-          z-index: 9999;
-        }
-        .gallery-container #lightbox.open {
-          display: flex;
-        }
-        .gallery-container #lightbox img {
-          max-width: 90vw;
-          max-height: 90vh;
-          box-shadow: 0 0 30px rgba(0,0,0,0.6);
-        }
-
-        /* ======== 移动端等比例缩放 ======== */
         @media (max-width: 768px) {
-          .gallery-container {
-            transform: scale(0.6);
-            transform-origin: top center;
-          }
+          .gallery-container { transform: scale(0.6); transform-origin: top center; }
         }
       `}</style>
 
@@ -221,7 +226,6 @@ export default function GalleryClient({ images }) {
           <button onClick={() => setItems([...images])}>顺序排列</button>
           <button onClick={() => setItems(prev => [...prev].reverse())}>倒序排列</button>
         </div>
-
         <ul>
           {items.map(img => (
             <li
@@ -241,15 +245,9 @@ export default function GalleryClient({ images }) {
             </li>
           ))}
         </ul>
-
-        <div
-          id="lightbox"
-          className={isOpen ? 'open' : ''}
-          onClick={() => setIsOpen(false)}
-        >
-          <img src={lightboxSrc} alt="放大图" />
-        </div>
       </div>
+
+      {isOpen && <Lightbox src={lightboxSrc} onClose={() => setIsOpen(false)} />}
     </>
   );
 }
