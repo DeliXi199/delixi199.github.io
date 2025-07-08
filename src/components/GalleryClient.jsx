@@ -11,6 +11,11 @@ export default function GalleryClient({ images }) {
   const [lightboxSrc, setLightboxSrc] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
+  // 控制是否在生产环境下忽略 EXIF 方向
+  const orientationCSS = process.env.NODE_ENV === 'production'
+    ? 'image-orientation: none;'
+    : '';
+
   const BASE = 270;
   const MIN_F = 0.9;
   const MAX_F = 1.1;
@@ -141,9 +146,7 @@ export default function GalleryClient({ images }) {
           border: 12px solid #fff;
           border-radius: 4px;
           background: #fff;
-          box-shadow:
-            inset 0 2px 4px rgba(0,0,0,0.1),
-            0 10px 20px rgba(0,0,0,0.3);
+          box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 10px 20px rgba(0,0,0,0.3);
           position: relative;
           top: 50px;
           transition: transform 0.6s ease, top 0.6s ease, opacity 0.6s ease;
@@ -161,14 +164,10 @@ export default function GalleryClient({ images }) {
           position: absolute;
           top: -10px; left: -10px;
           width: 20px; height: 20px;
-          background: radial-gradient(circle at 35% 35%,
-            #fff 20%, #ddd 45%, #aaa 75%, #888 100%);
+          background: radial-gradient(circle at 35% 35%, #fff 20%, #ddd 45%, #aaa 75%, #888 100%);
           border: 1px solid #666;
           border-radius: 50%;
-          box-shadow:
-            inset 0 2px 3px rgba(255,255,255,0.8),
-            inset 0 -2px 3px rgba(0,0,0,0.3),
-            0 2px 4px rgba(0,0,0,0.4);
+          box-shadow: inset 0 2px 3px rgba(255,255,255,0.8), inset 0 -2px 3px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.4);
           pointer-events: none;
         }
         .gallery-container ul li::before {
@@ -176,23 +175,17 @@ export default function GalleryClient({ images }) {
           position: absolute;
           top: 8px; left: -2px;
           width: 4px; height: 18px;
-          background: linear-gradient(
-            to bottom,
-            #ccc 0%, #999 50%, #666 100%
-          );
+          background: linear-gradient(to bottom, #ccc 0%, #999 50%, #666 100%);
           border-radius: 2px;
-          box-shadow:
-            inset 0 1px 1px rgba(255,255,255,0.6),
-            0 1px 2px rgba(0,0,0,0.3);
+          box-shadow: inset 0 1px 1px rgba(255,255,255,0.6), 0 1px 2px rgba(0,0,0,0.3);
           transform: rotate(15deg);
           pointer-events: none;
         }
         .gallery-container .photo img {
+          ${orientationCSS}
           display: block;
           border-radius: 2px;
-          filter: contrast(1.1)
-                  brightness(0.95)
-                  saturate(1.2);
+          filter: contrast(1.1) brightness(0.95) saturate(1.2);
           box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         .gallery-container .caption {
